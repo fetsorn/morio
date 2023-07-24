@@ -1,45 +1,10 @@
-async function runWorker(bar, param) {
-  const worker = new Worker(new URL('./browser.worker', import.meta.url));
+import LightningFS from '@isomorphic-git/lightning-fs';
 
-  worker.onmessage = async (message) => {
-    switch (message.data.action) {
-      case 'bar': {
-        try {
-          const result = await bar()
+const fs = new LightningFS('fs');
 
-          message.ports[0].postMessage({ result });
-        } catch (e) {
-          // safari cannot clone the error object, force to string
-          message.ports[0].postMessage({ error: `${e}` });
-        }
+const pfs = fs.promises;
 
-        break;
-      }
-
-      default:
-        // do nothing
-    }
-  };
-
-  return new Promise((res, rej) => {
-    const channel = new MessageChannel();
-
-    channel.port1.onmessage = ({ data }) => {
-      channel.port1.close();
-
-      if (data.error) {
-        rej(data.error);
-      } else {
-        res(data.result);
-      }
-    };
-
-    worker.postMessage(
-      { action: 'foo', param },
-      [channel.port2],
-    );
-  });
-}
+const dir = "/root"
 
 export class BrowserAPI {
 
@@ -47,11 +12,116 @@ export class BrowserAPI {
     //
   }
 
-  async bar() {
-    return `browser function 'bar'`
+  async fetchFile(filepath) {
+    console.log("fetchFile", filepath)
+
+    // check if path exists in the repo
+    const pathElements = dir.replace(/^\//, '').split('/').concat(filepath.split('/'));
+
+    let root = '';
+
+    for (let i = 0; i < pathElements.length; i += 1) {
+      const pathElement = pathElements[i];
+
+      root += '/';
+
+      const files = await pfs.readdir(root);
+
+      if (files.includes(pathElement)) {
+        root += pathElement;
+      } else {
+        // console.log(
+        //   `Cannot load file. Ensure there is a file called ${pathElement} in ${root}.`,
+        // );
+        // throw Error(
+        //   `Cannot load file. Ensure there is a file called ${pathElement} in ${root}.`
+        // );
+        return undefined;
+      }
+    }
+
+    const file = await pfs.readFile(`${dir}/${filepath}`);
+
+    return file;
   }
 
-  async foo(param) {
-    return runWorker(this.bar.bind(this), param);
+  async clone(remoteUrl, remoteToken) {
+    console.log("clone", remoteUrl, remoteToken)
+    try {
+      await this.rimraf(dir);
+    } catch {
+      // do nothing
+    }
+
+    const http = await import('isomorphic-git/http/web/index.cjs');
+
+    const options = {
+      fs,
+      http,
+      dir,
+      url: remoteUrl,
+      singleBranch: true,
+    };
+
+    if (remoteToken) {
+      options.onAuth = () => ({
+        username: remoteToken,
+      });
+    }
+
+    const {
+      clone, setConfig
+    } = await import('isomorphic-git');
+
+    await clone(options);
+
+    await setConfig({
+      fs,
+      dir,
+      path: `remote.origin.url`,
+      value: remoteUrl
+    });
+
+    if (remoteToken) {
+      await setConfig({
+        fs,
+        dir,
+        path: `remote.origin.token`,
+        value: remoteToken
+      });
+    }
+  }
+
+  async rimraf(rimrafpath) {
+    console.log("rimraf", rimrafpath)
+    let files;
+
+    try {
+      files = await pfs.readdir(rimrafpath);
+    } catch {
+      throw Error(`can't read ${rimrafpath} to rimraf it`);
+    }
+
+    for (const file of files) {
+      const filepath = `${rimrafpath}/${file}`;
+
+      const { type } = await pfs.stat(filepath);
+
+      if (type === 'file') {
+        await pfs.unlink(filepath);
+      } else if (type === 'dir') {
+        await this.rimraf(filepath);
+      }
+    }
+
+    await pfs.rmdir(rimrafpath);
+  }
+
+  async readFeed() {
+    return this.fetchFile("feed.xml")
+  }
+
+  async readTemplate() {
+    return this.fetchFile("index.mustache")
   }
 }

@@ -7,14 +7,36 @@ export class API {
     this.#browser = new BrowserAPI();
   }
 
-  async foo(param) {
+  async clone(repoURL, token) {
     // eslint-disable-next-line
     switch (__BUILD_MODE__) {
       case 'electron':
-        return window.electron.foo(param);
+        return window.electron.clone(repoURL, token);
 
       default:
-        return this.#browser.foo(param);
+        return this.#browser.clone(repoURL, token);
+    }
+  }
+
+  async readFeed() {
+    // eslint-disable-next-line
+    switch (__BUILD_MODE__) {
+      case 'electron':
+        return window.electron.readFeed();
+
+      default:
+        return this.#browser.readFeed();
+    }
+  }
+
+  async readTemplate() {
+    // eslint-disable-next-line
+    switch (__BUILD_MODE__) {
+      case 'electron':
+        return window.electron.readTemplate();
+
+      default:
+        return this.#browser.readTemplate();
     }
   }
 }

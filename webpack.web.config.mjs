@@ -1,9 +1,12 @@
 import path from 'path';
 import url from 'url';
 import webpack from 'webpack';
+import { createRequire } from 'module';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import 'dotenv/config'
 
+const require = createRequire(import.meta.url);
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 export default (env) => ({
@@ -32,6 +35,7 @@ export default (env) => ({
   plugins: [
     new webpack.DefinePlugin({
       __BUILD_MODE__: JSON.stringify(env.buildMode),
+      __DEFAULT_URL__: JSON.stringify(process.env.defaultURL)
     }),
 
     new MiniCssExtractPlugin({
@@ -42,11 +46,18 @@ export default (env) => ({
       template: './src/renderer/index.html',
       favicon: './public/favicon.ico',
     }),
+
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
   ],
   resolve: {
     alias: {
       '@': path.resolve(dirname, './src/renderer'),
       api: path.resolve(dirname, './src/api'),
+    },
+    fallback: {
+      buffer: require.resolve('buffer/'),
     },
     extensions: ['.js', '.jsx', '.css'],
   },

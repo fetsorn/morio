@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-module.exports = {
+export default (env) => ({
   // target: 'electron-renderer', // do not set,
   // causes "require is not defined" in electron-webpack-plugin
   entry: { renderer: './src/renderer/app.jsx' },
@@ -30,6 +30,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       __BUILD_MODE__: JSON.stringify('electron'),
+      __DEFAULT_URL__: JSON.stringify(env.defaultURL)
     }),
 
     new MiniCssExtractPlugin({
@@ -50,4 +51,4 @@ module.exports = {
     },
     extensions: ['.js', '.jsx', '.css'],
   },
-};
+});

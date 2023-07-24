@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   HashRouter as Router,
   Routes,
   Route,
+  useLocation,
 } from 'react-router-dom';
+import { useStore } from '@/store/index.js';
 import styles from './root.module.css';
-import { API } from 'api';
 
 export function Root() {
   return (
@@ -21,40 +22,37 @@ export function Root() {
 function Page() {
   const { t } = useTranslation();
 
-  const [param, setParam] = useState('');
+  const location = useLocation();
 
-  const [log, setLog] = useState('');
+  const [html, setHTML] = useState("<div>no feed</div>");
 
-  async function foo(param) {
-    const api = new API();
+  const [
+    initialize,
+    feed,
+    template
+  ] = useStore((state) => [
+    state.initialize,
+    state.feed,
+    state.template
+  ]);
 
-    const result = await api.foo(param);
+  useEffect(() => {
+    setHTML(feed)
+  }, [feed, template]);
 
-    setLog(result)
-  }
+  useEffect(() => {
+    initialize(location.search);
+  }, []);
 
   return (
     <>
       <main className={styles.main}>
         <p>running in {__BUILD_MODE__ === 'electron' ? "electron" : "browser"}</p>
 
-        <div>
-          <input
-            type="text"
-            value={param}
-            onChange={(e) => setParam(e.target.value)}
-          />
-
-          <button
-            type="button"
-            title={t('page.button.foo', { param })}
-            onClick={() => foo(param)}
-          >
-            foo
-          </button>
-        </div>
-
-        <p>{log}</p>
+        <div
+          className={styles.feed}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </main>
     </>
   );
