@@ -38,7 +38,7 @@ module.exports = {
     {
       name: '@electron-forge/plugin-webpack',
       config: {
-        devContentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self'; connect-src 'self' https://source.qualifiedself.org; frame-src 'self'; img-src 'self'; media-src 'self';",
+        devContentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self'; connect-src 'self' https://source.qualifiedself.org; frame-src 'self'; img-src 'self'; media-src 'self' https://source.qualifiedself.org; object-src 'self' https://source.qualifiedself.org",
         mainConfig: './webpack.main.config.js',
         renderer: {
           config: './webpack.renderer.config.js',

@@ -37,7 +37,7 @@ function Page() {
     state.template
   ]);
 
-  async function foo() {
+  async function parseFeed() {
     const parser = new Parser()
 
     if (feedXML) {
@@ -53,8 +53,20 @@ function Page() {
     }
   }
 
+  function renderMedia(url, mimetype) {
+    if (mimetype.includes('audio')) {
+      return <audio controls><source src={url} type={mimetype}/></audio>
+    }
+
+    if (mimetype.includes('video')) {
+      return <video controls><source src={url} type={mimetype}/></video>
+    }
+
+    return (<object data={url} type={mimetype}/>)
+  }
+
   useEffect(() => {
-    foo()
+    parseFeed()
   }, [feedXML, template]);
 
   useEffect(() => {
@@ -70,11 +82,12 @@ function Page() {
         <br/>
 
         <div>
-          {feed?.items?.sort((a,b) => a?.pubDate?.localeCompare(b?.pubDate)).map((item) => (
+          {feed?.items?.sort((a,b) => b?.pubDate?.localeCompare(a?.pubDate)).map((item) => (
             <div key={`item ${Math.random()}`}>
               <h3>{item.title}</h3>
               <p>{item.pubDate}</p>
               <p style={{whiteSpace: "pre"}}>{item.contentSnippet}</p>
+              {item.enclosure ? renderMedia(item.enclosure.url, item.enclosure.type) : (<div></div>)}
               <br/>
             </div>
           ))}

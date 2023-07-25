@@ -13,8 +13,6 @@ export class BrowserAPI {
   }
 
   async fetchFile(filepath) {
-    console.log("fetchFile", filepath)
-
     // check if path exists in the repo
     const pathElements = dir.replace(/^\//, '').split('/').concat(filepath.split('/'));
 
@@ -46,7 +44,6 @@ export class BrowserAPI {
   }
 
   async clone(remoteUrl, remoteToken) {
-    console.log("clone", remoteUrl, remoteToken)
     try {
       await this.rimraf(dir);
     } catch {
@@ -93,7 +90,6 @@ export class BrowserAPI {
   }
 
   async rimraf(rimrafpath) {
-    console.log("rimraf", rimrafpath)
     let files;
 
     try {
