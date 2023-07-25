@@ -27,30 +27,21 @@
           builtins.elemAt (pkgs.lib.versions.splitVersion pkgs.nodejs.version)
           0;
         webappDrv = buildMode:
+          { defaultURL ? "" }:
           pkgs.mkYarnPackage rec {
             name = package.name;
             version = package.version;
             src = pkgs.nix-gitignore.gitignoreSource [ ".git" ] ./.;
             preConfigure = ''
-              substituteInPlace package.json --replace "webpack --config webpack.web.config.mjs" "yarn exec webpack-cli -- --mode=development --config webpack.web.config.mjs --env buildMode=${buildMode}"
+              substituteInPlace package.json --replace "webpack --config webpack.web.config.mjs" "yarn exec webpack-cli -- --mode=development --config webpack.web.config.mjs --env buildMode=${buildMode} --env defaultURL=${defaultURL}"
             '';
             buildPhase = ''
-              yarn run build:webapp
+              yarn run webapp:build
             '';
             installPhase = "cp -r ./deps/${name}/release/renderer $out";
             distPhase = "true";
           };
-        webapp = webappDrv "webapp";
-        server = pkgs.mkYarnPackage rec {
-          name = basename + "-server";
-          version = "1.0.0";
-          src = ./src/server;
-          buildPhase = ''
-            mkdir -p deps/${name}/build
-            cp -r ${webappDrv "server"}/* deps/${name}/build/
-            chmod -R 755 deps/${name}/build/*
-          '';
-        };
+        webapp = pkgs.callPackage (webappDrv "webapp") { };
         electronBuilds = {
           "23.1.0" = {
             "linux-x64" = pkgs.fetchurl {
@@ -227,7 +218,7 @@
           };
       in rec {
         packages = {
-          inherit webapp server;
+          inherit webapp;
           linux = {
             x64 = {
               deb = buildDeb "x64";
@@ -263,7 +254,6 @@
           ];
         };
         defaultPackage = packages.webapp;
-        defaultApp = server;
         devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             nodejs
