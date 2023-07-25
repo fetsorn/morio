@@ -35,7 +35,7 @@ export default (env) => ({
   plugins: [
     new webpack.DefinePlugin({
       __BUILD_MODE__: JSON.stringify(env.buildMode),
-      __DEFAULT_URL__: JSON.stringify(process.env.defaultURL)
+      __DEFAULT_URL__: JSON.stringify(env.defaultURL ?? process.env.defaultURL)
     }),
 
     new MiniCssExtractPlugin({
@@ -58,6 +58,11 @@ export default (env) => ({
     },
     fallback: {
       buffer: require.resolve('buffer/'),
+      stream: require.resolve('stream-browserify'),
+      http: require.resolve('stream-http'),
+      https: require.resolve('https-browserify'),
+      url: require.resolve('url'),
+      timers: require.resolve('timers-browserify'),
     },
     extensions: ['.js', '.jsx', '.css'],
   },

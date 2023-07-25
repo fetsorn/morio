@@ -33,7 +33,7 @@
             version = package.version;
             src = pkgs.nix-gitignore.gitignoreSource [ ".git" ] ./.;
             preConfigure = ''
-              substituteInPlace package.json --replace "webpack --config webpack.web.config.mjs" "yarn exec webpack-cli -- --mode=development --config webpack.web.config.mjs --env buildMode=${buildMode} --env defaultURL=${defaultURL}"
+              substituteInPlace package.json --replace "webpack --config webpack.web.config.mjs" "yarn exec webpack-cli -- --mode=development --config webpack.web.config.mjs --env buildMode=${buildMode} --env defaultURL='${defaultURL}'"
             '';
             buildPhase = ''
               yarn run webapp:build

@@ -6,6 +6,7 @@ import {
   Route,
   useLocation,
 } from 'react-router-dom';
+import Parser from 'rss-parser';
 import { useStore } from '@/store/index.js';
 import styles from './root.module.css';
 
@@ -24,11 +25,11 @@ function Page() {
 
   const location = useLocation();
 
-  const [html, setHTML] = useState("<div>no feed</div>");
+  const [feed, setFeed] = useState({});
 
   const [
     initialize,
-    feed,
+    feedXML,
     template
   ] = useStore((state) => [
     state.initialize,
@@ -36,9 +37,25 @@ function Page() {
     state.template
   ]);
 
+  async function foo() {
+    const parser = new Parser()
+
+    if (feedXML) {
+      try {
+        const feed = await parser.parseString(feedXML)
+
+        console.log(feed)
+
+        setFeed(feed)
+      } catch {
+        // do nothing
+      }
+    }
+  }
+
   useEffect(() => {
-    setHTML(feed)
-  }, [feed, template]);
+    foo()
+  }, [feedXML, template]);
 
   useEffect(() => {
     initialize(location.search);
@@ -47,12 +64,23 @@ function Page() {
   return (
     <>
       <main className={styles.main}>
-        <p>running in {__BUILD_MODE__ === 'electron' ? "electron" : "browser"}</p>
+        <h1>{feed?.title}</h1>
+        <h2>{feed?.description}</h2>
 
-        <div
-          className={styles.feed}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <br/>
+
+        <div>
+          {feed?.items?.sort((a,b) => a?.pubDate?.localeCompare(b?.pubDate)).map((item) => (
+            <div key={`item ${Math.random()}`}>
+              <h3>{item.title}</h3>
+              <p>{item.pubDate}</p>
+              <p style={{whiteSpace: "pre"}}>{item.contentSnippet}</p>
+              <br/>
+            </div>
+          ))}
+        </div>
+
+        {feed.lastBuildDate ? (<p>UPD: {feed?.lastBuildDate}</p>) : (<div></div>)}
       </main>
     </>
   );
