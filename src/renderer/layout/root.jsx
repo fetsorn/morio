@@ -5,6 +5,8 @@ import {
   Route,
   useLocation,
 } from 'react-router-dom';
+import { parse } from 'marked';
+import DOMPurify from 'dompurify';
 import Parser from 'rss-parser';
 import { useStore } from '@/store/index.js';
 import styles from './root.module.css';
@@ -96,7 +98,11 @@ function Page() {
           <div id={item.title} key={`item ${Math.random()}`}>
             <h3>{item.title}</h3>
             <p>{item.pubDate}</p>
-            <p style={{ whiteSpace: 'pre' }}>{item.contentSnippet}</p>
+            {/* <p style={{ whiteSpace: 'pre' }}>{DOMPurify.sanitize(parse(item.contentSnippet))}</p> */}
+            <div
+              /* style={{ whiteSpace: 'pre' }} */
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parse(item.contentSnippet)) }}
+            />
             {item.enclosure ? renderMedia(item.enclosure.url, item.enclosure.type) : (<div />)}
             <br />
           </div>

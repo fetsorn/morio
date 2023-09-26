@@ -4,3 +4,8 @@
 .feed {
     background-color: gray;
 }
+
+img[alt="image"] {
+  max-width:  500px;
+  display: block;
+}
