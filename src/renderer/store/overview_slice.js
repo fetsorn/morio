@@ -1,5 +1,3 @@
-import { API, schemaRoot } from 'api';
-
 export const createOverviewSlice = (set, get) => ({
   schema: {},
 
@@ -7,7 +5,7 @@ export const createOverviewSlice = (set, get) => ({
 
   repoURL: undefined,
 
-  feed: undefined,
+  feedXML: undefined,
 
   template: undefined,
 
@@ -16,19 +14,34 @@ export const createOverviewSlice = (set, get) => ({
 
     const repoURL = searchParams.get('~') ?? __DEFAULT_URL__;
 
+    // check if phone
     const token = searchParams.get('-') ?? '';
 
-    const api = new API();
+    if (true) {
+      // fetch from repo URL without totken
+      const feedXML = await (await fetch(`${repoURL}/raw/branch/main/feed.xml`)).text();
 
-    await api.clone(repoURL, token);
+      set({
+        feedXML,
+      });
+    } else {
+      const { API } = await import('api');
 
-    const feed = await api.readFeed();
+      const api = new API();
 
-    const template = await api.readTemplate();
+      await api.clone(repoURL, token);
+
+      const feedXML = await api.readFeed();
+
+      const template = await api.readTemplate();
+
+      set({
+        feedXML,
+        template,
+      });
+    }
 
     set({
-      feed,
-      template,
       repoURL,
       isInitialized: true,
     });
