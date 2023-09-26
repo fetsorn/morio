@@ -21,8 +21,6 @@ export const createOverviewSlice = (set, get) => ({
 
     const postID = searchParams.get('_') ?? '';
 
-    console.log('AAA', postID);
-
     if (true) {
       // fetch from repo URL without totken
       const feedXML = await (await fetch(`${repoURL}/raw/branch/main/feed.xml`)).text();

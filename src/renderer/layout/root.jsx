@@ -5,7 +5,7 @@ import {
   Route,
   useLocation,
 } from 'react-router-dom';
-import { parse } from 'marked';
+import { micromark } from 'micromark';
 import DOMPurify from 'dompurify';
 import Parser from 'rss-parser';
 import { useStore } from '@/store/index.js';
@@ -98,10 +98,10 @@ function Page() {
           <div id={item.title} key={`item ${Math.random()}`}>
             <h3>{item.title}</h3>
             <p>{item.pubDate}</p>
-            {/* <p style={{ whiteSpace: 'pre' }}>{DOMPurify.sanitize(parse(item.contentSnippet))}</p> */}
             <div
-              /* style={{ whiteSpace: 'pre' }} */
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parse(item.contentSnippet)) }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(micromark(item.contentSnippet)),
+              }}
             />
             {item.enclosure ? renderMedia(item.enclosure.url, item.enclosure.type) : (<div />)}
             <br />
