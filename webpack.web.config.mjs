@@ -4,7 +4,7 @@ import webpack from 'webpack';
 import { createRequire } from 'module';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import 'dotenv/config'
+import 'dotenv/config';
 
 const require = createRequire(import.meta.url);
 const dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -35,7 +35,7 @@ export default (env) => ({
   plugins: [
     new webpack.DefinePlugin({
       __BUILD_MODE__: JSON.stringify(env.buildMode),
-      __DEFAULT_URL__: JSON.stringify(env.defaultURL ?? process.env.defaultURL)
+      __DEFAULT_URL__: JSON.stringify(env.defaultURL ?? process.env.defaultURL),
     }),
 
     new MiniCssExtractPlugin({
