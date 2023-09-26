@@ -9,6 +9,8 @@ export const createOverviewSlice = (set, get) => ({
 
   template: undefined,
 
+  postID: undefined,
+
   initialize: async (search) => {
     const searchParams = new URLSearchParams(search);
 
@@ -16,6 +18,10 @@ export const createOverviewSlice = (set, get) => ({
 
     // check if phone
     const token = searchParams.get('-') ?? '';
+
+    const postID = searchParams.get('_') ?? '';
+
+    console.log('AAA', postID);
 
     if (true) {
       // fetch from repo URL without totken
@@ -44,6 +50,7 @@ export const createOverviewSlice = (set, get) => ({
     set({
       repoURL,
       isInitialized: true,
+      postID,
     });
   },
 });

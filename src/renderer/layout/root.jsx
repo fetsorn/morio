@@ -28,10 +28,12 @@ function Page() {
     initialize,
     feedXML,
     template,
+    postID,
   ] = useStore((state) => [
     state.initialize,
     state.feedXML,
     state.template,
+    state.postID,
   ]);
 
   async function parseFeed() {
@@ -72,6 +74,16 @@ function Page() {
     initialize(location.search);
   }, []);
 
+  useEffect(() => {
+    if (postID) {
+      const el = document.getElementById(postID);
+
+      if (el) {
+        window.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
+      }
+    }
+  });
+
   return (
     <main className={styles.main}>
       <h1>{feed?.title}</h1>
@@ -81,7 +93,7 @@ function Page() {
 
       <div>
         {feed?.items?.sort((a, b) => b?.pubDate?.localeCompare(a?.pubDate)).map((item) => (
-          <div key={`item ${Math.random()}`}>
+          <div id={item.title} key={`item ${Math.random()}`}>
             <h3>{item.title}</h3>
             <p>{item.pubDate}</p>
             <p style={{ whiteSpace: 'pre' }}>{item.contentSnippet}</p>
