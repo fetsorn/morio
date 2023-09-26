@@ -4,6 +4,7 @@ import webpack from 'webpack';
 import { createRequire } from 'module';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import 'dotenv/config';
 
 const require = createRequire(import.meta.url);
@@ -13,6 +14,14 @@ export default (env) => ({
   entry: './src/renderer/app.jsx',
   mode: process.env.production ? 'production' : 'development',
   devtool: 'source-map',
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        safari10: true,
+      },
+    })],
+  },
   output: {
     path: path.resolve(dirname, 'release/renderer'),
     filename: '[name].bundle.js',
